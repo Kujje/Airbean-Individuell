@@ -2,8 +2,6 @@
 
 Detta projekt är en individuell backend-examination i Node.js där man bygger ett admin-API för att hantera en kaffemeny.
 
-<!--
-👨‍🏫 Lärarinformation:
 
 Compass Connection String:
 mongodb+srv://<USERNAME>:<PASSWORD>@nodecluster.snskfcw.mongodb.net/Airbean-Admin?retryWrites=true&w=majority
@@ -11,7 +9,7 @@ mongodb+srv://<USERNAME>:<PASSWORD>@nodecluster.snskfcw.mongodb.net/Airbean-Admi
 Driver Connection String:
 mongodb+srv://<USERNAME>:<PASSWORD>@nodecluster.snskfcw.mongodb.net/?retryWrites=true&w=majority&appName=nodecluster
 
-Användare:
-username: airteacher  
-lösenord: säkertlösen123
--->
+## Dokumentation
+
+Swagger finns på:
+[http://localhost:3000/api-docs](http://localhost:3000/api-docs)
