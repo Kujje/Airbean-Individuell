@@ -9,7 +9,4 @@ mongodb+srv://<USERNAME>:<PASSWORD>@nodecluster.snskfcw.mongodb.net/Airbean-Admi
 Driver Connection String:
 mongodb+srv://<USERNAME>:<PASSWORD>@nodecluster.snskfcw.mongodb.net/?retryWrites=true&w=majority&appName=nodecluster
 
-## Dokumentation
 
-Swagger finns på:
-[http://localhost:3000/api-docs](http://localhost:3000/api-docs)
