@@ -1,16 +1,20 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 import User from "../models/user.js";
 import { generatePrefixedId } from "../utils/IdGenerator.js";
 import { createUser, findUserByUsername } from "../services/user.js";
-
 import { validateAuthBody } from "../middlewares/validators.js";
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // REGISTER
-// POST /api/auth/register
 router.post("/register", validateAuthBody, async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   try {
     const existingUser = await findUserByUsername(username);
@@ -18,12 +22,14 @@ router.post("/register", validateAuthBody, async (req, res) => {
       return res.status(400).json({ message: "Användarnamnet är redan taget" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const userId = generatePrefixedId("user");
+
     const newUser = await createUser({
       userId,
       username,
-      password,
-      role: "user",
+      password: hashedPassword,
+      role: role || "user",
     });
 
     res.status(201).json({
@@ -31,48 +37,44 @@ router.post("/register", validateAuthBody, async (req, res) => {
       userId: newUser.userId,
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Fel vid registrering", error: err.message });
+    res.status(500).json({ message: "Fel vid registrering", error: err.message });
   }
 });
 
-// LOGIN (eller fortsätt som gäst)
-// POST /api/auth/login
+// LOGIN
 router.post("/login", validateAuthBody, async (req, res) => {
   const { username, password, continueAsGuest } = req.body;
 
   if (continueAsGuest) {
     const guestId = generatePrefixedId("guest");
-    global.user = {
-      userId: guestId,
-      username: "Gäst",
-      role: "guest",
-    };
+    const token = jwt.sign({ userId: guestId, role: "guest" }, JWT_SECRET, { expiresIn: "1h" });
 
-    return res.json({
+    return res.status(200).json({
       message: "Fortsätter som gäst",
-      user: global.user,
+      token,
     });
   }
 
   try {
-    const user = await User.findOne({ username });
-    if (!user || user.password !== password) {
-      return res
-        .status(401)
-        .json({ message: "Felaktigt användarnamn eller lösenord" });
+    const user = await findUserByUsername(username);
+    if (!user) {
+      return res.status(401).json({ message: "Felaktigt användarnamn eller lösenord" });
     }
 
-    global.user = {
-      userId: user.userId,
-      username: user.username,
-      role: user.role,
-    };
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return res.status(401).json({ message: "Felaktigt användarnamn eller lösenord" });
+    }
 
-    res.json({
+    const token = jwt.sign(
+      { userId: user.userId, username: user.username, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({
       message: "Inloggning lyckades",
-      user: global.user,
+      token,
     });
   } catch (err) {
     res.status(500).json({ message: "Fel vid inloggning", error: err.message });
@@ -80,9 +82,7 @@ router.post("/login", validateAuthBody, async (req, res) => {
 });
 
 // LOGOUT
-// GET /api/auth/logout
 router.get("/logout", (req, res) => {
-  global.user = null;
   res.json({ message: "Utloggning lyckades!" });
 });
 

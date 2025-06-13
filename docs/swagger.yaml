@@ -1,0 +1,153 @@
+openapi: 3.0.0
+info:
+  title: Airbean Admin API
+  version: 1.0.0
+  description: API för att hantera kaffemenyn (admin endpoints + auth)
+
+servers:
+  - url: http://localhost:3000
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/menu:
+    post:
+      summary: Lägg till ny produkt
+      tags: [Menu]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, desc, price]
+              properties:
+                title:
+                  type: string
+                desc:
+                  type: string
+                price:
+                  type: number
+      responses:
+        '201':
+          description: Produkt tillagd
+        '400':
+          description: Felaktiga fält
+        '403':
+          description: Ej behörig
+
+  /api/menu/{prodId}:
+    put:
+      summary: Uppdatera produkt
+      tags: [Menu]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: prodId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, desc, price]
+              properties:
+                title:
+                  type: string
+                desc:
+                  type: string
+                price:
+                  type: number
+      responses:
+        '200':
+          description: Produkt uppdaterad
+        '404':
+          description: Produkten hittades inte
+
+    delete:
+      summary: Ta bort produkt
+      tags: [Menu]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: prodId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Produkt raderad
+        '404':
+          description: Produkten hittades inte
+
+  /api/auth/register:
+    post:
+      summary: Registrera ny användare
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password, role]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, admin]
+      responses:
+        '201':
+          description: Användare skapad
+        '400':
+          description: Ogiltiga fält
+        '409':
+          description: Användarnamn redan taget
+
+  /api/auth/login:
+    post:
+      summary: Logga in användare
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Inloggning lyckades
+        '401':
+          description: Felaktigt användarnamn eller lösenord
+
+  /api/auth/logout:
+    get:
+      summary: Logga ut användare
+      tags: [Auth]
+      responses:
+        '200':
+          description: Utloggning lyckades

@@ -10,9 +10,10 @@ import cartRoutes from "./routes/cart.js";
 import menuRoutes from "./routes/menu.js";
 import promotionRoutes from "./routes/promotions.js";
 import orderRoutes from "./routes/order.js";
+import swaggerRoutes from "./routes/docs.js";
 
 // configuration
-dotenv.config(); // Detta laddar miljövariabler från en .env-fil
+dotenv.config(); 
 const app = express(); // Detta skapar upp en express-applikation
 const PORT = process.env.PORT;
 mongoose.connect(process.env.CONNECTION_STRING);
@@ -21,7 +22,7 @@ const database = mongoose.connection;
 // middleware
 app.use(express.json());
 app.use(logger);
-
+app.use("/api-docs", swaggerRoutes);
 // Global user:
 global.user = null; // Lagra den inloggade användaren globalt
 
